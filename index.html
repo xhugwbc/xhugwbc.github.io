@@ -446,6 +446,74 @@
             display: block;
         }
 
+        /* Catalog Navigation */
+        .catalog-nav {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            padding: 20px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 12px 12px 0;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .catalog-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .catalog-nav li {
+            margin-bottom: 8px;
+        }
+
+        .catalog-nav a {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .catalog-nav a:hover {
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            padding-left: 16px;
+        }
+
+        .catalog-nav a.active {
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .catalog-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .catalog-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .catalog-nav::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+
+        /* Scroll offset for anchor links */
+        section {
+            scroll-margin-top: 20px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
@@ -470,6 +538,10 @@
                 padding: 8px 14px;
                 font-size: 13px;
             }
+
+            .catalog-nav {
+                display: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -482,6 +554,21 @@
     </style>
 </head>
 <body>
+    <!-- Catalog Navigation -->
+    <nav class="catalog-nav">
+        <ul>
+            <li><a href="#locomotion">Cross-Embodiment Locomotion</a></li>
+            <li><a href="#teleoperation">Cross-Embodiment Teleoperation</a></li>
+            <li><a href="#loco-manipulation">Loco-Manipulation</a></li>
+            <li><a href="#real-world">Real-World Experiment</a></li>
+            <li><a href="#simulation">Simulation Experiment</a></li>
+            <li><a href="#results">Experiments Results</a></li>
+            <li><a href="#abstract">Abstract</a></li>
+            <li><a href="#method">Method</a></li>
+            <li><a href="#bibtex">BibTeX</a></li>
+        </ul>
+    </nav>
+
     <!-- Hero Section -->
     <section class="hero">
         <video class="hero-video" autoplay loop muted playsinline>
@@ -548,9 +635,9 @@
                 </div>
             </section>
             
-            <section class="section">
+            <section class="section" id="locomotion">
                 <div class="container">
-                
+
                     <h2 class="section-title-box">Cross-Embodiment Locomotion</h2>
 
                     <div class="video-section"> 
@@ -568,7 +655,7 @@
                 </div>
             </section>
 
-            <section>
+            <section id="teleoperation">
                 <h2 class="section-title-box">Cross-Embodiment Teleoperation</h2>
                 <div class="video-grid full-width-grid">
                     <div class="video-card">
@@ -588,7 +675,7 @@
                 </p>
             </section>
 
-            <section>
+            <section id="loco-manipulation">
                 <h2 class="section-title-box">Cross-Embodiment Loco-Manipulation</h2>
                 <div class="video-grid full-width-grid">
 
@@ -631,7 +718,7 @@
                 </p>
             </section>
 
-            <section>
+            <section id="real-world">
                 <h2 class="section-title-box">Robot Introduction in the Real-World Experiment</h2>
 
                 <img src="images/real_robots.png"
@@ -645,7 +732,7 @@
                     ">
             </section>
 
-            <section>
+            <section id="simulation">
                 <h2 class="section-title-box">Simulation Experiment</h2>
                 <div class="video-grid full-width-grid">
                     <div class="video-card">
@@ -674,7 +761,7 @@
                 </p>
             </section>
 
-            <section>
+            <section id="results">
                 <h2 class="section-title-box">Experiments Results</h2>
                 <img src="images/experiment_1.png"
                     alt="robot_real_world"
@@ -703,7 +790,7 @@
             </section>
 
             <!-- Abstract -->
-            <section>
+            <section id="abstract">
                 <h2 class="section-title-box">Abstract</h2>
                 <div class="abstract">
                     Learning-based whole-body controllers have become a key driver for humanoid robots, yet most existing approaches require robot-specific training. In this paper, we study the problem of cross-embodiment humanoid control and show that a single policy can robustly generalize across a wide range of humanoid robot designs with one-time training. We introduce <strong>XHugWBC</strong>, a novel cross-embodiment training framework that enables generalist humanoid control through: (1) physics-consistent morphological randomization, (2) semantically aligned observation and action spaces across diverse humanoid robots, and (3) effective policy architectures modeling morphological and dynamical properties. XHugWBC is not tied to any specific robot. Instead, it internalizes a broad distribution of morphological and dynamical characteristics during training. By learning motion priors from diverse randomized embodiments, the policy acquires a strong structural bias that supports zero-shot transfer to previously unseen robots. Experiments on twelve simulated humanoids and seven real-world robots demonstrate the strong generalization and robustness of the resulting universal controller.
@@ -711,7 +798,7 @@
             </section>
 
             <!-- Method -->
-            <section>
+            <section id="method">
                 <h2 class="section-title-box">Method</h2>
                 <img src="images/framework.png" 
                     alt="Framework" 
@@ -729,7 +816,7 @@
             </section>
 
             <!-- BibTeX -->
-            <section>
+            <section id="bibtex">
                 <h2>BibTeX</h2>
                 <div class="bibtex-container">
                     <button class="copy-btn" onclick="copyBibtex()"><i class="fa-regular fa-copy"></i> Copy</button>
@@ -762,6 +849,47 @@ year={2026}
                 }, 2000);
             });
         }
+
+        // Catalog navigation active section highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.catalog-nav a');
+
+        function highlightNavLink() {
+            const scrollPosition = window.scrollY + 100;
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#' + sectionId) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }
+
+        window.addEventListener('scroll', highlightNavLink);
+        window.addEventListener('load', highlightNavLink);
+
+        // Smooth scroll for catalog links
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     </script>
 </body>
 </html>
