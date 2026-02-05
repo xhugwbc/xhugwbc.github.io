@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XHugWBC: Scalable and General Whole-Body Control for Cross-Humanoid Locomotion</title>
+    <title>Scalable and General Whole-Body Control for Cross-Humanoid Locomotion</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons/css/academicons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -79,7 +80,7 @@
         }
 
         .hero-subtitle {
-            font-size: 1.75rem;
+            font-size: 3.5rem;
             font-weight: 400;
             line-height: 1.4;
             margin-bottom: 40px;
@@ -87,11 +88,45 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
+        .hero-content-line1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            margin: 0 auto; 
+            text-align: center;
+            width: 100%; 
+            max-width: 1800px;
+            position: relative;
+            z-index: 2;
+            align-items: center;
+            text-align: center;
+            padding: 0 24px;
+            margin: 0 auto;
+            max-width: 1800px;
+            white-space: nowrap;
+        }
+        
+        .hero-title-line1 {
+            font-size: 3rem;
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
         .hero-authors {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
             line-height: 2;
             opacity: 0.9;
-            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+            /* text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3); */
+            color: #6b7280;
+        }
+
+        .hero-authors a {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .hero-authors sup {
@@ -99,7 +134,7 @@
         }
 
         .hero-note {
-            font-size: 0.85rem;
+            font-size: 1.2rem;
             opacity: 0.7;
             margin-top: 24px;
         }
@@ -134,6 +169,49 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
+        .middle-nav {
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            gap: 12px;              
+            margin-top: 30px;       
+            margin-bottom: -50px;   
+            flex-wrap: wrap; 
+            width: 100%;
+            font-family:'Times New Roman', Times, serif
+        }
+
+        .middle-nav a {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px; 
+            gap: 8px; 
+            
+
+            background: #24292f;    
+            color: #ffffff;         
+            
+            border-radius: 30px;    
+            text-decoration: none;
+            font-weight: 300;
+            font-size: 16px; 
+            transition: all 0.3s ease;
+            /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+            white-space: nowrap;
+        }
+
+        .middle-nav a:hover {
+            transform: translateY(-3px);
+            background: #000000;    
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .middle-nav a i {
+            font-size: 1.1em;
+        }
+
         /* Scroll Indicator */
         .scroll-indicator {
             position: absolute;
@@ -146,6 +224,48 @@
             animation: bounce 2s infinite;
         }
 
+        .section-title-box {
+            display: inline-block;      
+            background-color: #000;     
+            color: #fff;                
+            padding: 8px 16px;          
+            font-size: 1.5rem;         
+            font-weight: 400;
+            margin-bottom: 24px;       
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .video-single {
+            display: block;
+            margin: 0 auto;             
+            width: 90%;                 
+            border-radius: 10px;
+        }
+
+        .video-double {
+            display: block;
+            margin: 0 auto;             
+            width: 50%;                 
+            border-radius: 10px;
+        }
+
+        .video-section {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    
+            gap: 10px;              
+        }
+
+        .custom-title {
+            font-family: "Times New Roman", Times, serif;  
+            font-size: 1.4rem;                            
+            font-weight: normal;                            
+            line-height: 1.4;                              
+            margin-bottom: 16px;                       
+        }
+
+
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
             40% { transform: translateX(-50%) translateY(-10px); }
@@ -154,7 +274,7 @@
 
         /* Main Content */
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -191,8 +311,18 @@
             background: var(--section-bg);
             border-radius: 12px;
             padding: 32px;
-            font-size: 1.05rem;
+            font-size: 1.2rem;
             text-align: justify;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .method {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 32px;
+            font-size: 1.2rem;
+            text-align: justify;
+            font-family: 'Times New Roman', Times, serif;
         }
 
         /* Method */
@@ -202,13 +332,6 @@
             margin: 16px 0;
         }
 
-        /* Video Grid */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-top: 24px;
-        }
 
         @media (max-width: 768px) {
             .video-grid {
@@ -216,16 +339,29 @@
             }
         }
 
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            justify-content: center; 
+            gap: 8px; 
+            max-width: 1800px; 
+            margin: 0 auto; 
+        }
+
         .video-card {
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            width: 95%; 
+            margin: 0 auto; 
+            /* box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); */
         }
 
         .video-card video {
-            width: 100%;
+            width: 100%; 
             display: block;
+            border-radius: 12px;
         }
+
 
         /* Single Video */
         .single-video {
@@ -299,6 +435,17 @@
             text-decoration: none;
         }
 
+        .logo-row {
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            gap: 100px;              
+        }
+
+        .logo-row img {
+            display: block;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
@@ -338,7 +485,7 @@
     <!-- Hero Section -->
     <section class="hero">
         <video class="hero-video" autoplay loop muted playsinline>
-            <source src="videos/video_total.mp4" type="video/mp4">
+            <source src="videos/video_all.mp4" type="video/mp4">
         </video>
         <div class="hero-overlay"></div>
 
@@ -350,17 +497,7 @@
 
         <div class="hero-content">
             <h1 class="hero-title">XHugWBC</h1>
-            <p class="hero-subtitle">Scalable and General Whole-Body Control<br>for Cross-Humanoid Locomotion</p>
-            <div class="hero-authors">
-                Yufei Xue<sup>*1,2</sup>, Yunfeng Lin<sup>*1,2</sup>, Wentao Dong<sup>1,2</sup>, Yang Tang<sup>1,2</sup>
-                <br>
-                Jingbo Wang<sup>2</sup>, Jiangmiao Pang<sup>2</sup>, Ming Zhou<sup>2</sup>, Minghuan Liu<sup>1</sup>, Weinan Zhang<sup>1,2</sup>
-            </div>
-            <div class="hero-note">
-                <sup>*</sup> Equal Contribution &nbsp;&nbsp;
-                <sup>1</sup> Shanghai Jiao Tong University &nbsp;&nbsp;
-                <sup>2</sup> Shanghai AI Laboratory
-            </div>
+            <p class="hero-subtitle">Scalable and General Whole-Body Control<br>for Cross-Humanoid Locomotion</p> 
         </div>
 
         <div class="scroll-indicator">
@@ -368,106 +505,206 @@
         </div>
     </section>
 
+
     <!-- Main Content -->
     <main>
+
         <div class="container">
-            <!-- Simulation Results -->
             <section>
-                <h2>Simulation Experiments</h2>
-                <div class="video-grid">
+                <div class="hero-content-line1">
+                    <h1 class="hero-title-line1">
+                    <span style="color:#76b900">XHugWBC</span>:Scalable and General Whole-Body</span>
+                    <br>
+                    Control for Cross-Humanoid Locomotion
+                    </h1>
+
+                    <div class="hero-authors">
+                        <a>Yufei Xue</a><sup>*</sup>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="https://github.com/CreeperLin">Yunfeng Lin</a><sup>*</sup>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a>Wentao Dong</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a>Yang Tang</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="https://wangjingbo1219.github.io/">Jingbo Wang</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <br>
+                        <a href="https://oceanpang.github.io/">Jiangmiao Pang</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="https://www.mingzak.com/">Ming Zhou</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="https://minghuanliu.com/">Minghuan Liu</a><sup>†</sup>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="https://wnzhang.net/">Weinan Zhang</a><sup>†</sup>
+                    </div>
+
+                    <div class="hero-note">
+                        <sup>*</sup> Equal Contribution &nbsp;&nbsp;
+                        <span style="color: black;">Shanghai AI Lab</span>&nbsp;&nbsp;
+                        <span style="color: black;">Shanghai Jiao Tong University</span>&nbsp;&nbsp;
+                    </div>
+
+                    <nav class="middle-nav">
+                        <a href="#"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                        <a href="#"><i class="ai ai-arxiv"></i> ArXiv</a>
+                        <a href="#"><i class="fab fa-youtube"></i> Video</a>
+                        <a href="#"><i class="fab fa-twitter"></i> Summary</a>
+                        <a href="#"><i class="fab fa-github"></i> Code (Coming Soon)</a>
+                    </nav>
+
+                </div>
+            </section>
+            
+            <section class="section">
+                <div class="container">
+                
+                    <h2 class="section-title-box">Cross-Embodiment Locomotion</h2>
+
+                    <div class="video-section"> 
+                        <video autoplay muted loop playsinline controls 
+                            src="./videos/cross_locomotion.mp4" 
+                            class="video-single">
+                        </video>
+                    </div>
+
+                    <p style="text-align: center; color: var(--text-muted); font-weight: normal; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                        <strong>Single Policy Control All Humanoids.</strong>
+                            Generalist zero-shot generalization across seven humanoids <br> with diverse DoFs, dynamic characteristics, and morphological structures.
+                    </p>
+                    
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title-box">Cross-Embodiment Teleoperation</h2>
+                <div class="video-grid full-width-grid">
                     <div class="video-card">
                         <video controls muted playsinline>
-                            <source src="videos/simulation_all_1.mp4" type="video/mp4">
+                            <source src="videos/cross_teleoperation_1.mp4" type="video/mp4">
                         </video>
                     </div>
                     <div class="video-card">
                         <video controls muted playsinline>
-                            <source src="videos/simulation_all_2.mp4" type="video/mp4">
+                            <source src="videos/cross_teleoperation_2.mp4" type="video/mp4">
                         </video>
                     </div>
                 </div>
-                <img src="images/simulation_experiment.png" alt="Simulation Results" class="results-img" style="margin-top: 24px;">
-            </section>
 
-            <!-- Teaser -->
-            <section>
-                <img src="images/teaser.png" alt="Teaser" class="teaser-img">
-                <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 12px;">
-                    <strong>Zero-shot generalization and real-world capabilities.</strong>
-                    Top: Robust zero-shot generalization across seven humanoids with diverse DoFs, dynamics, and morphologies.
-                    Bottom: Flexible teleoperation enables long-horizon whole-body loco-manipulation tasks.
+                <p style="text-align: center; color: var(--text-muted); font-weight: normal; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>Whole-Body Teleoperation.</strong> Real-time teleoperation of diverse humanoid robots using a single policy <br> driven by human teleoperator.
                 </p>
             </section>
 
-            <!-- Locomotion Videos -->
             <section>
-                <h2>Locomotion</h2>
-                <h3>Zero-shot Cross-Embodiment Control</h3>
-                <div class="single-video">
-                    <video controls muted playsinline>
-                        <source src="videos/locomotion.mp4" type="video/mp4">
-                    </video>
-                </div>
-            </section>
+                <h2 class="section-title-box">Cross-Embodiment Loco-Manipulation</h2>
+                <div class="video-grid full-width-grid">
 
-            <!-- Teleoperation Videos -->
-            <section>
-                <h2>Teleoperation</h2>
-                <h3>Whole-Body Control via Human Commands</h3>
-                <div class="video-grid">
                     <div class="video-card">
+                        <p style="text-align: center; color: black; font-weight: 400; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px; margin-bottom: 10px;">
+                            H1-2 Clean up the Toys
+                        </p>
                         <video controls muted playsinline>
-                            <source src="videos/teleoperation_1.mp4" type="video/mp4">
+                            <source src="videos/h12_loco_manipulation.mp4" type="video/mp4">
                         </video>
                     </div>
                     <div class="video-card">
+                        <p style="text-align: center; color: black; font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px; margin-bottom: 10px;">
+                            G1 Clean up the Toys
+                        </p>
                         <video controls muted playsinline>
-                            <source src="videos/teleoperation_2.mp4" type="video/mp4">
+                            <source src="videos/g1_loco_manipulation_1.mp4" type="video/mp4">
                         </video>
                     </div>
-                </div>
-            </section>
-
-            <!-- Loco-Manipulation Videos -->
-            <section>
-                <h2>Loco-Manipulation</h2>
-                <h3>Long-Horizon Whole-Body Tasks</h3>
-                <div class="video-grid">
                     <div class="video-card">
+                        <p style="text-align: center; color: black; font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px; margin-bottom: 10px;">
+                            G1 Open Door
+                        </p>
                         <video controls muted playsinline>
                             <source src="videos/Open_Door_1.mp4" type="video/mp4">
                         </video>
                     </div>
                     <div class="video-card">
+                        <p style="text-align: center; color: black; font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px; margin-bottom: 10px;">
+                            G1 Open Door
+                        </p>
                         <video controls muted playsinline>
                             <source src="videos/Open_Door_2.mp4" type="video/mp4">
                         </video>
                     </div>
-                    <div class="video-card">
-                        <video controls muted playsinline>
-                            <source src="videos/loco_manipulation_g1_1.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                    <div class="video-card">
-                        <video controls muted playsinline>
-                            <source src="videos/loco_manipulation_g1_2.mp4" type="video/mp4">
-                        </video>
-                    </div>
                 </div>
+
+                <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>Long-Horizon Loco-Manipulation.</strong> The robot first walks toward the box on the right and bends to grasp the plush toy. Next, it opens the door with the other hand, walks through, stops in front of the basket, squats, and places the toy inside, then neatly arranges the toys outside the basket.
+                </p>
             </section>
 
-            <!-- Real-World Results -->
             <section>
-                <h2>Real-World Experiments</h2>
-                <img src="images/real_world.png" alt="Real World Results" class="results-img">
-                <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 12px;">
-                    Zero-shot generalization across seven diverse real-world humanoid robots with varying degrees of freedom, dynamics, and morphological structures.
+                <h2 class="section-title-box">Robot Introduction in the Real-World Experiment</h2>
+
+                <img src="images/real_robots.png"
+                    alt="robot_real_world"
+                    style="
+                        display: block;
+                        margin: 24px auto;
+                        width: 90%;
+                        max-width: 1400px;
+                        height: auto;
+                    ">
+            </section>
+
+            <section>
+                <h2 class="section-title-box">Simulation Experiment</h2>
+                <div class="video-grid full-width-grid">
+                    <div class="video-card">
+                        <video controls muted playsinline>
+                            <source src="videos/simulation_all_2.mp4" type="video/mp4">
+                        </video>
+                    
+                    <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                        <strong>Cross-Embodiment Parallel Training</strong> 
+                    </p>
+                    </div>
+                    <div class="video-card">
+                        <video controls muted playsinline>
+                            <source src="videos/embodiment data.mp4" type="video/mp4">
+                        </video>
+                    <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                        <strong>Embodiment Data Visualization</strong> 
+                    </p>
+                    </div>
+                </div>
+
+                <img src="images/simulation_experiment.png" alt="Framework" class="method-img">
+
+                <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>Robot Introduction in the Simulation Experiment</strong> 
+                </p>
+            </section>
+
+            <section>
+                <h2 class="section-title-box">Experiments Results</h2>
+                <img src="images/experiment_1.png"
+                    alt="robot_real_world"
+                    style="
+                        display: block;
+                        margin: 24px auto;
+                        width: 90%;
+                        max-width: 1400px;
+                        height: auto;
+                    ">
+                <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>Comparing Training Curves of the Fine-tuned Policies with the Generalist Policy and Specialist Policies</strong>
+                </p>
+                <img src="images/experiment_2.png"
+                    alt="robot_real_world"
+                    style="
+                        display: block;
+                        margin: 24px auto;
+                        width: 90%;
+                        max-width: 1400px;
+                        height: auto;
+                    ">
+                <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>Generalist Average Command Tracking Errors and Survival Rates Aggregated Across <br> All Robots Compared with Specialist</strong>
                 </p>
             </section>
 
             <!-- Abstract -->
             <section>
-                <h2>Abstract</h2>
+                <h2 class="section-title-box">Abstract</h2>
                 <div class="abstract">
                     Learning-based whole-body controllers have become a key driver for humanoid robots, yet most existing approaches require robot-specific training. In this paper, we study the problem of cross-embodiment humanoid control and show that a single policy can robustly generalize across a wide range of humanoid robot designs with one-time training. We introduce <strong>XHugWBC</strong>, a novel cross-embodiment training framework that enables generalist humanoid control through: (1) physics-consistent morphological randomization, (2) semantically aligned observation and action spaces across diverse humanoid robots, and (3) effective policy architectures modeling morphological and dynamical properties. XHugWBC is not tied to any specific robot. Instead, it internalizes a broad distribution of morphological and dynamical characteristics during training. By learning motion priors from diverse randomized embodiments, the policy acquires a strong structural bias that supports zero-shot transfer to previously unseen robots. Experiments on twelve simulated humanoids and seven real-world robots demonstrate the strong generalization and robustness of the resulting universal controller.
                 </div>
@@ -475,11 +712,19 @@
 
             <!-- Method -->
             <section>
-                <h2>Method</h2>
-                <img src="images/framework.png" alt="Framework" class="method-img">
-                <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 12px;">
-                    <strong>XHugWBC Framework.</strong> Our approach combines physics-consistent morphological randomization,
-                    unified state-action representation, and graph-based policy architecture for cross-humanoid whole-body control.
+                <h2 class="section-title-box">Method</h2>
+                <img src="images/framework.png" 
+                    alt="Framework" 
+                    style="
+                    display: block;
+                    margin: 24px auto;
+                    width: 90%;
+                    max-width: 1400px;
+                    height: auto;
+                    "
+                    class="method-img">
+                <p style="text-align: center; color: var(--text-muted); font-weight: 500; font-size: 1.4rem; font-family: 'Times New Roman', Times, serif; margin-top: 16px;">
+                    <strong>XHugWBC Framework:</strong> 1). physics-consistent morphological randomization yields diverse humanoid embodiments, 2) unified state–action representation with semantic alignment across different robots, 3) graph-based policy for cross-humanoid control.
                 </p>
             </section>
 
@@ -489,11 +734,12 @@
                 <div class="bibtex-container">
                     <button class="copy-btn" onclick="copyBibtex()"><i class="fa-regular fa-copy"></i> Copy</button>
                     <div class="bibtex-code">@article{xue2026xhugwbc,
-  title={Scalable and General Whole-Body Control for Cross-Humanoid Locomotion},
-  author={Xue, Yufei and Lin, Yunfeng and Dong, Wentao and Tang, Yang and Wang, Jingbo and Pang, Jiangmiao and Zhou, Ming and Liu, Minghuan and Zhang, Weinan},
-  journal={arXiv preprint},
-  year={2026}
-}</div>
+title={Scalable and General Whole-Body Control for Cross-Humanoid Locomotion},
+author={Xue, Yufei and Lin, Yunfeng and Dong, Wentao and Tang, Yang and Wang, Jingbo and Pang, Jiangmiao and Zhou, Ming and Liu, Minghuan and Zhang, Weinan},
+journal={arXiv preprint},
+year={2026}
+}
+</div>
                 </div>
             </section>
         </div>
