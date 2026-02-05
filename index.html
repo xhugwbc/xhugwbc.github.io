@@ -859,13 +859,13 @@ year={2026}
 
         // Catalog navigation visibility toggle
         const catalogNav = document.querySelector('.catalog-nav');
-        const heroSection = document.querySelector('.hero');
+        const locomotionSection = document.getElementById('locomotion');
 
         function toggleCatalogNav() {
             const scrollPosition = window.scrollY;
-            const heroHeight = heroSection.offsetHeight;
+            const locomotionTop = locomotionSection.offsetTop;
 
-            if (scrollPosition > heroHeight * 0.5) {
+            if (scrollPosition >= locomotionTop - 200) {
                 catalogNav.classList.add('visible');
             } else {
                 catalogNav.classList.remove('visible');
