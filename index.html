@@ -456,10 +456,17 @@
             padding: 20px 12px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 12px;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
             max-height: 70vh;
             overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .catalog-nav.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .catalog-nav ul {
@@ -477,7 +484,7 @@
             padding: 8px 12px;
             color: var(--text-color);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             border-left: 3px solid transparent;
             transition: all 0.2s ease;
@@ -850,6 +857,21 @@ year={2026}
             });
         }
 
+        // Catalog navigation visibility toggle
+        const catalogNav = document.querySelector('.catalog-nav');
+        const heroSection = document.querySelector('.hero');
+
+        function toggleCatalogNav() {
+            const scrollPosition = window.scrollY;
+            const heroHeight = heroSection.offsetHeight;
+
+            if (scrollPosition > heroHeight * 0.5) {
+                catalogNav.classList.add('visible');
+            } else {
+                catalogNav.classList.remove('visible');
+            }
+        }
+
         // Catalog navigation active section highlighting
         const sections = document.querySelectorAll('section[id]');
         const navLinks = document.querySelectorAll('.catalog-nav a');
@@ -873,8 +895,14 @@ year={2026}
             });
         }
 
-        window.addEventListener('scroll', highlightNavLink);
-        window.addEventListener('load', highlightNavLink);
+        window.addEventListener('scroll', () => {
+            toggleCatalogNav();
+            highlightNavLink();
+        });
+        window.addEventListener('load', () => {
+            toggleCatalogNav();
+            highlightNavLink();
+        });
 
         // Smooth scroll for catalog links
         navLinks.forEach(link => {
