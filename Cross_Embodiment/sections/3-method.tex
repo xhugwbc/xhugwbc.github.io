@@ -1,0 +1,345 @@
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{images/framework.png}
+\caption{\small \textbf{Training framework of \our.}
+(\textbf{a}) \textbf{Data generation}: physics-consistent morphological randomization produces diverse and physically meaningful embodiments.
+(\textbf{b}) \textbf{Universal embodiment representation}: robot-specific states are projected into a global joint space, upon which an embodiment graph is constructed.
+(\textbf{c}) \textbf{Policy learning}: the generalist policy uses a GCN- or Transformer-based encoder together with a state estimator.
+\textbf{Deployment}: the learned policy generalizes to seven humanoid robots with different kinematic, dynamic, and morphological structures in zero-shot.}
+\label{fig:framework}
+\vspace{-10pt}
+\end{figure*}
+
+\section{Method}
+\subsection{Physics-Consistent Morphological Randomization}
+\label{sec: interpretable morphological randomization}
+With the success of domain randomization~\cite{Sim2Real2018, eth2019sci, eth2022sci, wjzamp} in training robust whole-body controllers~\cite{xue2025hugwbc, zeng2025bfm, wang2025more}, a straightforward approach for learning cross-humanoid policies is to randomize the embodied data~\cite{feng2022genloco, bohlinger2024onepolicy} across kinematic, dynamic, and morphological dimensions.
+However, a robot's inertial parameters must satisfy physical consistency~\cite{Traversaro2016manifolds} to represent plausible rigid bodies, making the feasible parameter space inherently non-convex and discontinuous.
+Prior work on physics-based simulation and legged locomotion often overlooks this requirement, either because experiments are conducted entirely in simulation or because robot links are approximated using simple geometric primitives whose dynamics are scaled in a linear and often physically invalid manner~\cite{Trabucco2022AnyMorph,ai2025towards}.
+For humanoid robots with highly complex and heterogeneous structures, perturbing inertial parameters without enforcing physical consistency can easily produce unrealizable models, destabilize simulation, drive policy optimization toward degeneracy, and ultimately cause catastrophic failures in sim-to-real transfer.
+We therefore introduce physics-consistent morphological randomization to generate diverse and plausible embodied data.
+
+
+\paragraph{Parameterizing a template robot.}
+We capture the shared structures of humanoid robots in a template model and define a parameter vector that encodes its kinematic layout, link geometries, inertial properties, and joint configurations.
+\[  
+    \boldsymbol{\kappa} = [\boldsymbol{\kappa}_\text{link}, \boldsymbol{\kappa}_\text{joint}] \in \mathbb{R}^{N}~,
+\]
+where $\boldsymbol{\kappa}_\text{link} \in \mathbb{R}^{10n_b}$ are parameters of robot links, $\boldsymbol{\kappa}_\text{joint} \in \mathbb{R}^{13n_d}$ are parameters of robot joints, $n_b \in \mathbb{N}_{+}$ and $n_d \in \mathbb{N}_{+}$ are the number of the rigid bodies and the number of degrees of freedom, separately. In detail,
+$\boldsymbol{\kappa}_{\text{link}} = \big[ {\boldsymbol{\kappa}^{1}_{\text{l}}}^{\top}, \dots, {\boldsymbol{\kappa}^{n_b}_\text{l}}^{\top} \big]^{\top}$ represents the contributions from each rigid body,
+each $\boldsymbol{\kappa}^\text{i}_\text{l}$ corresponds to the inertial parameters of the $i$-th rigid body and is composed of
+\[
+[m, h_x, h_y, h_z, I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{xz}, I_{yz}]^{\top} \in \mathbb{R}^{10}
+\]
+where $m$ denotes the mass, $\mathbf{h} = [h_{x}, h_{y}, h_{z}]^{\top} = m \mathbf{c}^{\top}$ are the first mass moment where $\mathbf{c} \in \mathbb{R}^3$ denotes the center-of-mass (CoM) coordinates in the body frame, and 
+\[
+    \mathbf{\bar{I}} = \begin{bmatrix}
+  I_{xx} &  I_{xy} & I_{xz}\\
+  I_{xy} &  I_{yy} & I_{yz}\\
+  I_{xz} &  I_{yz} & I_{zz}
+\end{bmatrix}
+\]
+is the rotational inertia w.r.t. the coordinate origin.
+% which is a positive-definite matrix $\mathbf{\bar{I}} \; \succ \; 0$.
+% Denoting the rotational inertia w.r.t. the CoM as $\mathbf{\bar{I}}_{\text{C}}$~\cite{Traversaro2016manifolds, Wensing2018LMI}, the parallel‐axis theorem establishes a bijective mapping between the rotational inertia w.r.t. body frame origin $\mathbf{\bar{I}}$ and $\mathbf{\bar{I}}_{\text{C}}$
+% \begin{equation} 
+%     \mathbf{\bar{I}}_{\text{C}} = \mathbf{\bar{I}} - m \ \mathbf{S}(\mathbf{c}) \mathbf{S}(\mathbf{c})^{\top}~,
+% \end{equation}
+% where $\mathbf{S}(\mathbf{c})$ is a skew-symmetric matrix. 
+Similarly, joint parameters $\boldsymbol{\kappa}_{\text{joint}}$ represent the contributions from each joint and can be expressed as
+$\boldsymbol{\kappa}_{\text{joint}} = \big[ {\boldsymbol{\kappa}^{1}_\text{j}}^{\top}, \dots, {\boldsymbol{\kappa}^{n_b}_\text{j}}^{\top} \big]^{\top}$, where each $\boldsymbol{\kappa}^\text{i}_\text{j}$, which connects a parent link and a child link, and is defined by both spatial and dynamic parameters
+\[
+[ p_x, p_y, p_z, \phi, \theta,\psi, a_x, a_y, a_z, 
+    q_\text{min}, q_\text{max}, \dot{q}_\text{max}, \tau_\text{max} ]^{\top} \in \mathbb{R}^{13}
+\]
+where the $\mathbf{p} = [p_x, p_y, p_z]$ specifies the joint position in the parent frame, $\mathbf{e} = [\phi, \theta,\psi]$ represent its orientation, $\mathbf{a} = [a_x, a_y, a_z]$ defines the motion axis, and $q_\text{min}$, $q_\text{max}$, $\dot{q}_\text{max}$ and $\tau_\text{max}$ denote the range of motion, maximum velocity and torque, respectively. 
+For randomizing morphologies, intuitively, we can apply perturbations within this morphological space of the template robot:
+\begin{equation}
+    {\boldsymbol{\kappa}}' = \boldsymbol{\kappa} + \Delta\boldsymbol{\kappa}~, \quad \Delta\boldsymbol{\kappa} \sim \mathcal{D}_\text{morph}~.
+\end{equation}
+where $\mathcal{D}_\text{morph}$ is noise distribution. Nevertheless, adding $\Delta \boldsymbol{\kappa}$ is non-trivial, as arbitrary noises can break physical consistency. To achieve reasonable morphology randomization, we reparameterize the morphological space into a form that we can easily add noise to.
+
+
+
+\paragraph{Reparameterizing the link space.}
+
+\begin{definition}[Physics-Consistent Inertial Parameters]
+    A rigid body's inertial parameters $\kappa_{\text{link}}$ are said to be physically consistent if its pseudo-inertia matrix
+    \begin{equation}
+    \mathbf{J} =
+    \begin{bmatrix}
+    \mathbf{\Sigma} & \mathbf{h}^{\top} \\
+    \mathbf{h} & m
+    \end{bmatrix}
+    \end{equation}
+    is symmetric positive definite, where $\mathbf{\Sigma} = \tfrac{1}{2}\mathrm{Tr}(\bar{\mathbf{I}})\mathbf{I} - \bar{\mathbf{I}}$.
+\end{definition}
+
+Recall that the pseudo-inertia matrix admits the integral form~\citet{Traversaro2016manifolds} as
+\begin{equation}
+    \mathbf{J} = \int_{V} \mathbf{q}\mathbf{q}^{\top}\rho(\mathbf{x}) \, dV~, 
+    \quad \mathbf{q} = [\mathbf{x}^\top, 1]^\top,
+\end{equation}
+and the positive definiteness constraint $\mathbf{J}\succ 0$ can be enforced via linear matrix inequalities~\cite{Rucker2022smooth}.
+
+% \begin{definition}[Physics-Consistent Inertial Parameters]
+% To obtain physically plausible inertial parameters $\boldsymbol{\kappa}_{\text{link}}$~\cite{Traversaro2016manifolds}, we require the pseudo-inertia matrix
+% \begin{equation}
+% \mathbf{J} =
+% \begin{bmatrix}
+% \mathbf{\Sigma} & \mathbf{h}^{\top} \\
+% \mathbf{h} & m
+% \end{bmatrix} \, \succ \, 0~,
+% \quad
+% \mathbf{\Sigma} = \tfrac{1}{2}\mathrm{Tr}(\bar{\mathbf{I}})\mathbf{I} - \bar{\mathbf{I}},
+% \end{equation}
+% to satisfy a linear matrix inequality~\cite{Rucker2022smooth},
+% where $\mathbf{J} \in \mathbb{R}^{4 \times 4}$ is pseudo-inertia matrix of rigid body, originally defined as the integral form:
+% \begin{equation}
+%     \mathbf{J} = \int_{V} \mathbf{qq}^{\top}\rho(\mathbf{x}) \, dV~,
+%     \quad \mathbf{q} = [\mathbf{x}^\top, 1]^\top.
+% \end{equation}
+% \end{definition}
+
+% Positive definiteness of $\mathbf{J}$ allows a smooth, bijective parameterization via the Cholesky decomposition
+% \begin{equation}
+% \mathbf{J} = \mathbf{L}\mathbf{L}^{\top}~,
+% \end{equation}
+% where $\mathbf{L}$ is upper-triangular with a positive diagonal.
+
+\begin{lemma}[Cholesky-Level Parameterization]
+\label{lem:cholesky_parameterization}
+If $\mathbf{J} \succ 0$, then there exists a unique upper-triangular matrix 
+$\mathbf{L}$ with positive diagonal entries such that
+\begin{equation}
+    \mathbf{J} = \mathbf{L}\mathbf{L}^{\top}~.
+\end{equation}
+\end{lemma}
+
+Lemma~\ref{lem:cholesky_parameterization} implies that any physically consistent inertia matrix can be smoothly parameterized by its Cholesky factor $\mathbf{L}$. 
+Therefore, physics-consistent randomization can be implemented by perturbing $\mathbf{L}$ as
+\begin{equation}
+    \mathbf{L}' = \mathbf{L} + \boldsymbol{\epsilon}, 
+    \quad \boldsymbol{\epsilon}\sim \mathcal{D}, 
+    \quad \mathbf{J}' = \mathbf{L}'\mathbf{L}'^{\top},
+\end{equation}
+where $\mathcal{D}$ denotes a noise distribution.
+% \begin{lemma}[Cholesky-Level Randomization]
+% \label{lem: cholesky-parameterization}
+% Physics-consistent randomization by perturbing the entries of $\mathbf{L}$: 
+% \begin{equation}
+%     {\mathbf{J}}' = {\mathbf{L}}'{\mathbf{{L}}}'^{\top}~, \; \mathbf{{L}}' = \mathbf{{L}} + \boldsymbol{\epsilon}~, \; \boldsymbol{\epsilon}\sim \mathbf{\mathcal{D}}~,
+% \end{equation}
+% where $\mathbf{\mathcal{D}}$ is the noise distribution. 
+% \end{lemma}
+To provide geometric interpretability of such perturbations, we further examine how the pseudo-inertia transforms under affine deformations of the rigid body.
+% To achieve an explainable randomization and provide geometric insight into the resulting link, we model the perturbations as an affine transformation on the rigid-body geometry and scaling of the mass density:
+% \begin{equation}
+%     \begin{aligned}
+%         \label{eq: affine transformation}
+%         \mathbf{J}^{'} & = \int_{V} \mathbf{Eqq}^{\top}\mathbf{E}^{\top}\beta^{2}\rho(\mathbf{x}) \, dV \\
+%         & =\beta^{2} \mathbf{E}
+%         \underbrace{
+%         \int_{V} \mathbf{qq}^{\top}\rho(\mathbf{x}) \, dV}_{\mathbf{J}}
+%         \mathbf{E}^{\top} = \mathbf{U}\mathbf{L}\mathbf{L}^{\top}\mathbf{U}^{\top}~, \\
+%     \end{aligned}
+% \end{equation}
+% where $\mathbf{U}=\beta\mathbf{E}$, $\mathbf{E}$ denotes the linear component of the affine transformation and $\beta$ is mass density scaling factor. 
+\begin{lemma}[Affine Transformation of Pseudo-Inertia]
+\label{lem:affine_inertia}
+Under an affine transformation of body coordinates $\mathbf{x}'=\mathbf{E}\mathbf{x}$ and a mass density scaling $\rho'=\beta^{2}\rho$, 
+the pseudo-inertia matrix transforms as
+\begin{equation}
+    \mathbf{J}' 
+    = \int_{V} \mathbf{E}\mathbf{q}\mathbf{q}^{\top}\mathbf{E}^{\top}\beta^{2}\rho(\mathbf{x}) \, dV
+    = \mathbf{U}\mathbf{J}\mathbf{U}^{\top},
+\end{equation}
+where $\mathbf{U}=\beta\mathbf{E}$.
+\end{lemma}
+Combining Lemma~\ref{lem:cholesky_parameterization} and Lemma~\ref{lem:affine_inertia}, 
+any physically consistent inertia perturbation can be expressed as
+\begin{equation}
+    \mathbf{J}' = (\mathbf{U}\mathbf{L})(\mathbf{U}\mathbf{L})^{\top}.
+\end{equation}
+
+% \begin{lemma}[Upper-Triangular Factorization and $\mathbb{R}^{10}$ Parameterization]
+\begin{lemma}[$\mathbb{R}^{10}$ Bijective Mapping of Inertia]
+\label{lem:upper_triangular_U}
+The transformation matrix $\mathbf{U}\in GL^{+}(4)$ admits a unique upper-triangular factorization with positive diagonal entries.
+Moreover, parameterizing the diagonal entries via exponential maps yields a bijection between such $\mathbf{U}$ and a 10-dimensional real vector
+\begin{equation}
+    \theta_{\text{inert}} 
+    = [\alpha, d_1, d_2, d_3, s_{12}, s_{23}, s_{13}, t_1, t_2, t_3]^{\top} 
+    \in \mathbb{R}^{10},
+\end{equation}
+where the explicit matrix form of $\mathbf{U}$ is given in Appendix~\ref{ap: Proof Skeleton of Propositio}.
+\end{lemma}
+
+% \begin{lemma}[$\mathbb{R}^{10}$ Bijective Mapping of Inertia]
+% The matrix $\mathbf{U}$ can be uniquely chosen as an upper-triangular matrix with positive diagonal entries (proof in Appendix~\ref{ap: Physical Interpretation}). It can be parameterized using exponential mapping on the diagonal entries:
+% \begin{equation}
+%     \mathbf{U} = e^{\alpha} \begin{bmatrix}
+%   e^{d_1} &  s_{12} & s_{13} & t_1 \\
+%   0 &  e^{d_2} & s_{23} & t_2\\
+%   0 &  0 & e^{d_3} & t_3 \\
+%   0 &  0 & 0 & 1
+% \end{bmatrix}~,
+% \end{equation}
+% yielding a bijective mapping from original inertia to 10-dimensional explainable vector 
+% \[
+%     \theta_{\text{inert}} = [\alpha, d_1, d_2, d_3, s_{12}, s_{23}, s_{13}, t_1, t_2, t_3]^{\top} \in \mathbb{R}^{10}~.
+% \]
+% \end{lemma}
+\begin{proposition}[Smooth Physics-Consistent Randomization]
+\label{prop:smooth_randomization}
+Under Lemma~\ref{lem:cholesky_parameterization}--\ref{lem:upper_triangular_U}, 
+any physically consistent inertia perturbation $\mathbf{J}'\succ 0$ can be written as
+\begin{equation}
+    \mathbf{J}' = (\mathbf{U}\mathbf{L})(\mathbf{U}\mathbf{L})^{\top},
+\end{equation}
+where $\mathbf{U}$ is uniquely determined by $\theta_{\text{inert}}\in\mathbb{R}^{10}$.
+Consequently, physics-consistent randomization of inertial parameters can be performed by unconstrained perturbations in $\mathbb{R}^{10}$, 
+while preserving physical feasibility and smoothness of the parameter space.
+\end{proposition}
+
+Proof proposition~\ref{prop:smooth_randomization} in Appendix~\ref{ap: Proof Skeleton of Propositio}
+% \begin{proposition}[Physics-Consistent Randomization in Smooth Space]
+% Random perturbations applied to the inertia parameters are equivalent to apply an affine transformation to the Cholesky factor $\mathbf{L}^{'} = \mathbf{U}\mathbf{L}$, where the upper-triangular matrix $\mathbf{U}$ corresponds bijectively to the explainable parameter space $\theta_{\text{inert}} \in \mathbb{R}^{10}$.
+% Consequently, physically consistent randomization of inertia can be performed in $\mathbb{R}^{10}$ without violating physical feasibility.
+% \end{proposition}
+
+% Equlation~\ref{eq: affine transformation} can be rewritten as Cholesky level
+% \begin{equation}
+%     \mathbf{L^{'}}\mathbf{L^{'\top}} = \mathbf{UL}\mathbf{L}^{\top}\mathbf{U}^{\top}~,
+% \end{equation}
+% from which it follows that $\mathbf{U} = \mathbf{L^{'}}\mathbf{L^{-1}}$ is a unique upper triangular matrix with positive diagonal entries, since both $\mathbf{L}$ and $\mathbf{L^{'}}$ are upper-triangular.
+
+
+
+\paragraph{Reparameterizing the joint space.}
+In practical systems, joint parameters are typically constrained by their underlying inertial properties. Therefore, we perform joint space randomization over \textit{joint rotational axes}, \textit{joint position}, and \textit{joint actuation}.
+In particular, 1) we randomize the orientation of the hip joint's rotational axis $\mathbf{a}=[a_x, a_y, a_z]$, which enables the synthesis of a wide range of kinematically distinct hip configurations. The remaining joints follow a similar arrangement sequence across platforms.
+2) We randomize joint position $\mathbf{p} =[p_x, p_y, p_z]$ relative parent links frame, with magnitudes bounded within twice the distance to the link's center of mass. For motor control, the proportional-derivative (PD) gains and torque limits $\tau_\text{max}$ are linearly scaled with the total mass of the robot to maintain consistent actuation behavior across morphologies.
+3) We randomize the actuation type by sampling selected joints as either \textit{revolute} or \textit{fixed}, where fixed joints are rigidly locked and excluded from control. Joints subject to this randomization include three waist joints (roll, yaw, and pitch), seven arm joints (shoulder roll, yaw, and pitch; elbow pitch; and wrist roll, yaw, and pitch), and three head joints (roll, yaw, and pitch).
+As a result, the controller can operate on robots with widely varying degrees of freedom, ranging from a minimum of 12 active joints, corresponding to a pure bipedal configuration with three hip joints (roll, yaw, pitch), one knee joint, and two ankle joints (pitch, roll) per leg, to a maximum of 32 active joints, which additionally include three waist joints, two arms with seven joints each, and three head joints.
+Detailed randomization ranges are provided in Appendix~\ref{ap: Physical Interpretation}. 
+
+\subsection{Universal Cross-Embodiment Representation}
+Our goal is to develop a unified control policy across various morphologically diverse humanoid robots, each characterized by unique kinematic morphologies and differing numbers of actuated joints. A key challenge lies in the significant heterogeneity in their respective state and action spaces. To address this, we map robot-specific joint states into a global joint space for semantic alignment, and construct an embodiment graph on top of this global space to explicitly encode morphological structure.
+
+\paragraph{Joint space semantic alignment.}
+\citet{lin2025hzero} proposes a hardware‑agnostic joint space mapping that standardizes joint representations across embodiments, enabling a consistent robot control interface.
+Following this idea, we define a canonical joint dimension of $N_{\text{max}} = 32$, where each index corresponds to a semantically aligned joint in a globally defined ordering. For any humanoid robot, its joints are embedded into this canonical space according to their kinematic roles and semantic identities.
+Formally, for a robot instance with $N_r \le N_{\text{max}}$ joints and their configuration $\mathbf{q}_r \in \mathbb{R}^{N_r}$, we define a mapping
+\[
+    \phi_r:\mathbb{R}^{N_r} \to \mathbb{R}^{N_{max}},
+\]
+such that the canonical joint state $\mathbf{q}_\text{qlobal}$ is constructed as:
+{\small
+\begin{equation}
+\label{eq: global joint mapping function}
+\mathbf{q}_{\text{global}}[i] =
+\begin{cases}
+\mathbf{q}_{r}^{(j)}, & \text{if physical joint $j$ maps to global joint $i$},\\
+0, & \text{otherwise}.
+\end{cases}
+\end{equation}
+}
+The resulting $\mathbf{q}_{\text{global}} \in \mathbb{R}^{N{\text{max}}}$ is a zero-padded, canonical representation shared across all embodiments. By enforcing semantic alignment at the joint level, the control policy receives fixed-dimensional inputs regardless of morphological variations or differences in actuation. The global joint index definition is provided in Table~\ref{tab:global_joint_index}.
+% Consequently, the trained policy has the potential to generalize across heterogeneous robots and be transferred in a zero-shot manner to previously unseen embodiments.
+
+\paragraph{Graph-based morphology description.}
+The unified representation above naturally supports constructing a graph-based description of each robot's morphology.
+Each embodiment represented by $\mathbf{q}_\text{global}$ can be converted to a directed kinematic graph: $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, where the vertices set $\mathcal{V} = (v_{1}, v_{2}, \dots, v_{i})$ corresponds to joints, and the edge set
+\[
+    \mathcal{E} = \{e_{ij}=(v_i, v_j) \mid v_i, v_j \in \mathcal{V} \} \subseteq \mathcal{V} \times \mathcal{V} 
+\]
+captures rigid-body connections, with each edge $e_{ij}$ encodes the linkage between joint $v_i$ and $v_{j}$. The adjacency matrix $\mathbf{A} \in \{0,1 \}^{N_{\max} \times N_{\max}}$ is constructed from $\mathcal{E}$ and encodes the overall connectivity of the embodiment:
+\begin{equation}
+    \label{eq: adjacency matrix}
+    (\mathbf{A})_{ij} = 
+    \begin{cases}
+    1, & \text{if } (v_i, v_j) \in \mathcal{E}, \\
+    0, & \text{otherwise}.
+\end{cases}
+\end{equation}
+Humanoid robots often adopt parallel-linkage mechanisms, which complicate graph construction. To address this, we collapse all nodes involved in a parallel linkage and connect them directly to the preceding joint in the articulation. For instance, ankle joints are treated as immediate children of the knee joint in the resulting graph.
+The final graph $\mathcal{G}$ for each robot is connected and acyclic, forming a kinematic tree whose vertices may represent either actuated or fixed joints. This structure is expressive enough to encode diverse kinematic and actuation patterns, as well as morphological information for general control. Figure~\ref{fig:framework} (b) illustrates the mapping from the joint-level description to its corresponding adjacency matrix.
+
+
+\input{tables/single_commands_baseline}
+
+\subsection{Cross-Humanoid Learning}
+With physics-consistent morphological randomization and universal representation of structurally distinct robots, we proceed to develop a training strategy for a cross-humanoid control policy.
+We formulate the problem as a reinforcement learning task defined over a family of morphologically diverse robots $k \sim \mathcal{K}$. Each robot instance $k$ is modeled as a Partially Observable Markov Decision Process (POMDP):
+\[
+\mathcal{P}_k = (\mathcal{S}_k, \mathcal{O}_k, \mathcal{A}_k, \mathcal{R}_k, \gamma)~,
+\]
+where $\mathcal{S}_k$, ${\mathcal{O}_k}$ and $\mathcal{A}_k$ denote the state, observation, and action subspaces of robot $k$, represented in a universal space. 
+$\mathcal{R}_k$ is the reward function, and $\gamma$ is the discount factor.
+The learning objective is to optimize a single policy that maximizes the expected return over all embodiments:
+\begin{equation}
+    \max_{\pi} 
+    \mathbb{E}_{k \sim \mathcal{K}} \left[ 
+    \mathbb{E}_{\tau_k \sim (\pi, \mathcal{K}_k)} \Big[ \sum_{t=0}^{T} \gamma^t r_m(s_{t,m}, a_{t,m}) \Big] 
+\right]~.
+\end{equation}
+
+\paragraph{Observation.}
+Following~\cite{xue2025hugwbc}, the policy observation $o_t^{\pi}$ at timestep $t$ consists of a five-step history of proprioception $o_{t-4:t}^{P}$, a joint controllability indicator $I(t)$ and a whole-body command vector $c_t$. The proprioception observation $o_t^{P}$ is defined as:
+\[
+    o_t^{P} \triangleq \small [\omega_t, \; \text{g}_t, \; q_t, \; \dot{q}_t, \; a_{t-1}]~,
+\]
+where $\omega_t \in \mathbb{R}^3$ is base angular velocity, $\text{g}_t \in \mathbb{R}^3$ is base gravity direction, $q_t \in \mathbb{R}^{32}$ and $\dot{q}_t \in \mathbb{R}^{32}$ are joint positions and velocities respectively, and $a_{t-1} \in \mathbb{R}^{32}$ is the previous action. The binary indicator $I(t)$ specifies which joints are controllable. The command vector $c_t$ is defined as:
+\begin{equation}
+\begin{aligned}
+c_t \triangleq 
+    \small[
+    \underbrace{v_t^{x}, v_t^{y}, w_t^{z}}_{\text{velocity}},
+    \underbrace{h_t, p_t, \theta_t^{y}, \theta_t^{p}, \theta_t^{r}}_{\text{posture}},
+    \underbrace{\psi_t, \phi_{t,1}, \phi_{t,2}, \phi_{t,\text{stance}}}_{\text{gait}}
+    \small]~,
+\end{aligned}
+\end{equation}
+where the $v_t^{x}, v_t{^y}$ and $w_t^z$ are the target base velocity, $h_t$ is the target base height, $p_t$ is the target pelvis angle, $\theta_t^{y}$, $\theta_t^{p}$ and $\theta_t^{r}$ stand for the waist yaw, pitch and roll rotation, and the remaining terms control gait parameters. This command space ensures flexible whole-body control for versatile locomotion~\cite{xue2025hugwbc}.
+To incorporate the structural information encoded by the robot's graph description, we explore two encoder architectures: Graph Convolutional Networks (GCN)~\cite{kipf2017gcn} and Transformers~\cite{vaswani2017attention}.
+% ,model kinematic neighborhoods and generate the node feature. 
+These encoders model kinematic neighborhoods and produce node features that capture the topology of embodied motion.
+
+\paragraph{GCN policy encoder.}
+To model each robot's structure, we employ a Graph Convolutional Network (GCN)~\cite{kipf2017gcn} as a relational encoder. It operates on the node features $\mathbf{X}$ of the robot's connection graph (see Appendix~\ref{ap: Policy Training} for details).
+We stack multiple GCN layers to progressively aggregate information from local kinematic neighborhoods to higher-order relational contexts, producing structure-aware node features.
+
+\paragraph{Transformer policy encoder.}
+Transformers provide an alternative means for modeling robot structure via sequence-based attention. The input consists of node embeddings augmented with positional encodings:
+\begin{equation}
+    \mathbf{X}_\text{pos} = \mathbf{X} + \mathbf{W}_\text{pos}~,
+\end{equation}
+where $\mathbf{W}_\text{pos} \in \mathbb{R}^{N_\text{max} \times D}$ are the learned positional embeddings. To exploit kinematic structure, we adopt a topology-aware hybrid-mask strategy: the first layer applies masked attention according to the graph, while subsequent layers use unmasked self-attention for global information exchange.
+This produces topology-aware attention patterns, enabling integration of both local kinematic structure and global coordination.
+Additional details are provided in Appendix~\ref{ap: Policy Training}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{images/policy_finetune_curve.pdf}
+\vspace{-4pt}
+\caption{\small \textbf{Comparing training curves} of the fine-tuned policies with the generalist policy and specialist policies.}
+\label{fig:finetune_scratch_generalist}
+\vspace{-10pt}
+\end{figure*}
+
+\paragraph{State estimator.}
+To mitigate partial observability on real robots, we concurrently train a state estimator to reconstruct privileged information such as base linear velocity and base height. The estimator is optimized via supervised regression, and its outputs serve as the reconstructed privileged information used by the actor detokenizer. This supervised objective is jointly optimized with the RL loss.
+
+\paragraph{Action prediction.}
+The node features produced by the encoders are concatenated with a global vector $o_t^g$ and the reconstructed privileged information from the learned state estimator. This fused representation is fed into linear layers to generate per-node joint actions. These node-wise actions are then aggregated into a global action vector and mapped back to the robot's physical joints through an embodiment-specific inverse mapping function $\mathbf{\text{inv}}(\phi_r):\mathbb{R}^{N_\text{max}} \to\mathbb{R}^{N_r}$.
+
+\paragraph{Critic structure.}
+The critic network mirrors the actor but omits the state estimator. Its detokenizer outputs a value estimate for each joint node, and the final value is computed by averaging across node-wise estimates. During training, the critic additionally receives privileged observations that are unavailable on physical hardware, including pelvis and torso linear velocities, torso height, link-collision pairs, and the robot's morphological parameters, to ensure stable and accurate value estimation.
+
+% More details of the policy and critic network structure can be further found in the Appendix~\ref{ap: Policy Training}.
+Further architectural details for both the policy and critic networks are provided in Appendix~\ref{ap: Policy Training}.
+
+
+
+

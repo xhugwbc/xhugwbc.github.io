@@ -1,0 +1,48 @@
+\section{Introduction}
+Learning-based whole-body control (WBC) has become a dominant paradigm for legged robots, especially humanoids, enabling agile and robust behaviors beyond conventional model-based controllers~\cite{cheng2024express, he2024omnih2o, liao2025beyondmimic, xue2025hugwbc, yang2025omniretarget, li2025amo}.
+However, most existing controllers target single embodiment~\cite{pan2025ams, chen2025gmt}, requiring extensive retraining when transferred to new platforms. This limits scalability as each new robot differs in morphology, kinematics, and dynamics, making per-robot training costly and inefficient. A key open question therefore remains: \textbf{can a single learned controller generalize across diverse humanoid embodiments?}
+
+% Due to the highly dynamic contact interactions and the consistent requirements of stability and agility, it is non-trivial to do so. 
+Achieving this is challenging due to highly dynamic contacts, strict stability requirements, and large morphological variations.
+% Some recent attempts on learning cross-embodiment controllers have shown promising results in physical 
+Prior cross-embodiment efforts in animation~\cite{gupta2022metamorph, huang2020smp} and locomotion~\cite{yang2025multiloco, liulocoformer} rely on shared morphological priors, unified state-action representations, or similar dynamics. Such assumptions break down for humanoids, which diverge substantially in kinematic structure, degrees of freedom, joint ordering, and physical properties. Simplifications that have facilitated transfer in quadrupeds such as reduced dynamic models or relatively homogeneous body morphologies also break down for humanoids~\cite{feng2022genloco, Luo2024MorAL}, whose morphological diversity and whole-body dynamics are intrinsically more complex.
+
+To address these challenges, we propose \our, a framework for learning a cross-humanoid whole-body controller.
+\our combines:
+% 1) a novel morphological randomization scheme that generates a rich distribution of physics-consistent~\cite{Traversaro2016manifolds} embodiments, 
+1) physically consistent morphological randomization~\cite{Traversaro2016manifolds},
+2) a unified state-action representation that semantically aligns different embodiments, and 
+3) a policy architecture modeling embodiment-specific and graph-based representations derived from robot topologies.
+
+We evaluate \our across diverse humanoids in both simulation and reality.
+For the first time, a single generalist policy trained with our framework achieves robust zero-shot whole-body control across seven distinct real-world humanoid robots.
+In simulation, it scales to twelve distinct embodiments, reaching approximately 85\% of specialist performance, while generalist-initialized fine-tuning surpasses specialists by up to 10\%.
+% Together, these results demonstrate that our framework learns strong embodiment-agnostic humanoid motion priors and enables scalable, general-purpose humanoid control across diverse platforms.
+These results show that \our learns strong embodiment‑agnostic motion priors and enables scalable, general‑purpose humanoid control.
+% The key contributions are summarized as follows:
+Our main contributions are:
+\begin{itemize}[leftmargin=10pt]
+    \item A physics-consistent morphological randomization that yields diverse and physically meaningful embodiments.
+    \item A universal embodiment representation with tailored training techniques for cross-humanoid whole-body control.
+    \item To the best of our knowledge, this is the first generalist controller demonstrating robust zero-shot whole-body control across seven real-world humanoid robots with substantial diversity.
+\end{itemize}
+
+
+
+
+% Classical optimization-based control approaches generate stable motions by explicitly modeling system dynamics. To improve robustness, these methods often incorporate online parameter adaptation to compensate for variations in physical parameters and actuator characteristics. However, such adaptations are typically effective only for small parameter perturbations and struggle to accommodate large discrepancies in dynamics or substantial morphological differences, which limits their applicability to cross-embodiment control.
+
+% Recent advances in reinforcement learning have enabled the synthesis of robust locomotion behaviors for legged robots~\cite{liao2025beyondmimic, huang2025learning, su2025hitter, xue2025hugwbc, zeng2025bfm}. However, whether policies are learned from human demonstrations~\cite{yang2025omniretarget, luo2025sonic, yin2025unitracker} or sampled under a unified command space~\cite{xue2025hugwbc, sun2025ulc, li2025amo}, these successes remain largely confined to specific robotic morphologies. Significant differences in state–action spaces, dynamics, and structural characteristics across robots make the resulting motion priors difficult to transfer between control policies. Consequently, deploying reinforcement learning on an unseen robot often necessitates extensive reward engineering and hyperparameter tuning, which limits the development of a scalable, and efficient learning framework across diverse embodiments.
+
+% In recent years, cross-embodiment research has emerged as a prominent topic within reinforcement learning (RL), with notable advances demonstrated in manipulation tasks~\cite{embodiment2025openx, octomodelteam2024octo}. These efforts primarily aim to devise generalizable control strategies that can seamlessly accommodate variations in kinematic structures, sensing modalities, and control interfaces across different embodiments. Nevertheless, extending such approaches to legged locomotion remains considerably more challenging. Unlike manipulation, legged locomotion involves hybrid and highly dynamic whole-body contact interactions, where stability and agility must be simultaneously maintained. The methods that rely solely on kinematic considerations often fail to capture the essential dynamics required for effective whole-body control.
+
+% However, these largely rely on shared morphological priors, unified state–action representations, and similar dynamical properties, where allow policies to extract common knowledge from limited data and facilitate across platforms.
+% In contrast, extending these successes to humanoid robots is far more challenging. Different humanoid platforms often feature diverse kinematic structures, heterogeneous state representations, even distinct joint ordering, and sim-to-real physical considerations, making direct policy transfer non-trivial. Furthermore, the structural assumptions that support quadrupedal transfer—such as simplified dynamic approximations and morphological homogeneity in body shape—do not readily generalize to humanoid systems, where significant morphological diversity and complex whole-body dynamics must be explicitly addressed. Compounding these challenges, the scarcity of real-world humanoid embodiment data further hinders the training of generalist policies capable of robust cross-embodiment performance.
+
+% To obtain diverse humanoid embodiment data, we introduce an optimization-based morphological randomization scheme. We vectorize the embodiment parameters~\cite{Traversaro2016manifolds} and constrain them within a smooth space defined by linear matrix inequalities~\cite{Wensing2018LMI}. Sampling within this smooth feasible region yields a rich set of physically consistent~\cite{Lee2020Geometric, Rucker2022smooth} humanoid embodiments that closely cover the distribution of plausible human-like morphologies, while avoiding the drawbacks of conventional nonlinear optimization~\cite{Traversaro2016manifolds}. This high-fidelity embodiment dataset provides robust support for cross-embodiment generalist policy training. Remarkably, we find that using only a single embodiment as the initial template is sufficient for the resulting generalist policy to achieve zero-shot transfer to entirely different robot platforms.
+
+% To facilitate generalist policy learning, We design a unified state–action space to structurally align the semantic representations of different embodiments. In addition, we introduce a hybrid-mask Transformer as the core of our framework and construct embodiment-specific adjacency matrices derived from each robot’s topology. These adjacency matrices enable the generalist policy to implicitly infer embodiment-dependent dynamics, which we show to be more effective than explicitly providing morphological descriptors~\cite{bohlinger2024onepolicy, ai2025towards} as inputs.
+
+% In the real-world experiment, \our achieves near-perfect success rates across seven entirely distinct humanoid robots in whole-body control tasks, demonstrating robust zero-shot generalization. These seven robots differ substantially in their structural designs, physical properties, and hardware characteristics. In the simulation experiment, \our was evaluated across twelve entirely distinct embodiments. The generalist policy achieved approximately 80\% of the performance of embodiment-specific specialist policies, and training from the generalist policy further exceeded the performance of specialist policies by up to 20\%. Overall, our approach effectively learns embodiment-agnostic humanoid priors from the generated embodiment data and exhibits strong and robust generalization across diverse humanoid platforms.
+
+
